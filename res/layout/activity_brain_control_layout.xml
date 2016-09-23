@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".BrainControl.BrainControlActivity">
+
+    <RelativeLayout
+        android:id="@+id/surfaceView_Rl_gimbal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="0dp">
+
+        <dji.sdk.widget.DjiGLSurfaceView
+            android:id="@+id/DjiSurfaceView_gs"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/btnStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:text="Start"
+        android:onClick="onClick"/>
+    <Button
+        android:id="@+id/btnEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="End"
+        android:onClick="onClick"/>
+
+    <TextView
+        android:id="@+id/ConnectStateGsTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/btnStart"
+        android:layout_toLeftOf="@id/btnEnd"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:text="BLAT"
+        android:textSize="21sp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnStart"
+        android:background="@drawable/selector_button" >
+
+            <TextView
+                android:id="@+id/HotPointInfoTV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:text="GS State:"
+                android:layout_centerInParent="true"
+                android:textSize="14sp" />
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btnIncreaseAlt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+"
+            android:layout_marginBottom="8dp"
+            android:onClick="onClick"/>
+        <Button
+            android:id="@+id/btnDecreaseAlt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-"
+            android:onClick="onClick"/>
+    </LinearLayout>
+
+</RelativeLayout>
