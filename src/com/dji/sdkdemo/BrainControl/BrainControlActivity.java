@@ -1,9 +1,11 @@
 package com.dji.sdkdemo.BrainControl;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -29,6 +31,8 @@ import dji.sdk.widget.DjiGLSurfaceView;
 
 public class BrainControlActivity extends Activity implements View.OnClickListener {
 
+    public static final int REQUEST_CODE_ENABLE_BT = 1;
+
     protected Button btnStart;
     protected Button btnEnd;
     protected Button btnIncreaseAlt;
@@ -38,6 +42,7 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
     protected TextView mConnectStateTextView;
 
     FollowMeController fmController;
+    BTController btController;
 
     protected Timer mTimer;
 
@@ -61,6 +66,8 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
         btnDecreaseAlt = (Button)findViewById(R.id.btnDecreaseAlt);
 
         fmController = new FollowMeController(this);
+        btController = new BTController(this);
+        btController.startBTServer();
 
         mDjiGLSurfaceView.start();
 
@@ -168,6 +175,7 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
             DJIDrone.getDjiCamera().setReceivedVideoDataCallBack(null);
         mDjiGLSurfaceView.destroy();
         fmController.stopLocationUpdates();
+        btController.stopBTServer();
         super.onDestroy();
     }
 
@@ -210,6 +218,29 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQUEST_CODE_ENABLE_BT:
+                switch (resultCode) {
+                    case RESULT_OK:
+                        Log.d("BLAT", "onActivityResult: resultCode: RESULT_OK");
+                        break;
+                    case RESULT_CANCELED:
+                        Log.d("BLAT", "onActivityResult: resultCode: RESULT_CANCEL");
+                        break;
+                    default:
+                        Log.d("BLAT", "onActivityResult: resultCode: UNKNOWN: " + resultCode);
+                        break;
+                }
+                break;
+            default:
+                Log.d("BLAT", "onActivityResult: unkown request code: " + requestCode);
+                break;
+        }
+    }
+
     class Task extends TimerTask {
         //int times = 1;
 
@@ -219,6 +250,5 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
             //Log.d(TAG ,"==========>Task Run In!");
             checkConnectState();
         }
-
     };
 }
