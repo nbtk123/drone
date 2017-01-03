@@ -18,21 +18,20 @@ public class BTController implements Serializable {
 
     WeakReference<Context> context;
 
-    public BTController(Activity activityForResultIfBTNotEnabled) {
-        this.context = new WeakReference<Context>(activityForResultIfBTNotEnabled);
-        setup(activityForResultIfBTNotEnabled);
+    public BTController(Context context) {
+        this.context = new WeakReference<Context>(context);
     }
 
     public BluetoothAdapter getBluetoothAdapter() {
         return bluetoothAdapter;
     }
 
-    private boolean setup(Activity activityForResult){
+    public boolean setup(Activity activityForResultIfBTNotEnabled){
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter != null) {
             if (!bluetoothAdapter.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                activityForResult.startActivityForResult(enableBtIntent, BrainControlActivity.REQUEST_CODE_ENABLE_BT);
+                activityForResultIfBTNotEnabled.startActivityForResult(enableBtIntent, BrainControlActivity.REQUEST_CODE_ENABLE_BT);
             }
 
             return true;

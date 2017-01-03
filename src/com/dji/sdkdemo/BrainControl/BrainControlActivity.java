@@ -67,7 +67,9 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
 
         fmController = new FollowMeController(this);
         btController = new BTController(this);
-        btController.startBTServer();
+        if (btController.setup(this)) {
+            btController.startBTServer();
+        }
 
         mDjiGLSurfaceView.start();
 
@@ -226,6 +228,7 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
                 switch (resultCode) {
                     case RESULT_OK:
                         Log.d("BLAT", "onActivityResult: resultCode: RESULT_OK");
+                        btController.startBTServer();
                         break;
                     case RESULT_CANCELED:
                         Log.d("BLAT", "onActivityResult: resultCode: RESULT_CANCEL");
