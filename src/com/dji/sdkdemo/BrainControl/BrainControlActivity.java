@@ -3,13 +3,11 @@ package com.dji.sdkdemo.BrainControl;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dji.sdkdemo.R;
 
@@ -18,18 +16,13 @@ import java.util.TimerTask;
 
 import dji.sdk.api.DJIDrone;
 import dji.sdk.api.GroundStation.DJIGroundStationMissionPushInfo;
-import dji.sdk.api.GroundStation.DJIGroundStationTypeDef;
-import dji.sdk.api.GroundStation.DJIHotPointInitializationInfo;
 import dji.sdk.api.MainController.DJIMainControllerSystemState;
-import dji.sdk.interfaces.DJIGroundStationCancelCallBack;
-import dji.sdk.interfaces.DJIGroundStationExecuteCallBack;
 import dji.sdk.interfaces.DJIGroundStationMissionPushInfoCallBack;
-import dji.sdk.interfaces.DJIGroundStationTakeOffCallBack;
 import dji.sdk.interfaces.DJIMcuUpdateStateCallBack;
 import dji.sdk.interfaces.DJIReceivedVideoDataCallBack;
 import dji.sdk.widget.DjiGLSurfaceView;
 
-public class BrainControlActivity extends Activity implements View.OnClickListener {
+public class BrainControlActivity extends Activity implements View.OnClickListener, View.OnTouchListener {
 
     public static final int REQUEST_CODE_ENABLE_BT = 1;
 
@@ -37,12 +30,19 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
     protected Button btnEnd;
     protected Button btnIncreaseAlt;
     protected Button btnDecreaseAlt;
+
+    protected Button btnForward;
+    protected Button btnBackward;
+    protected Button btnLeft;
+    protected Button btnRight;
+
     protected DjiGLSurfaceView mDjiGLSurfaceView;
     protected TextView mHotPointTextView;
     protected TextView mConnectStateTextView;
 
     FollowMeController fmController;
     BTController btController;
+    JoystickController joystickController;
 
     protected Timer mTimer;
 
@@ -65,11 +65,24 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
         btnIncreaseAlt = (Button)findViewById(R.id.btnIncreaseAlt);
         btnDecreaseAlt = (Button)findViewById(R.id.btnDecreaseAlt);
 
+        btnForward = (Button) findViewById(R.id.btnForward);
+        btnBackward = (Button) findViewById(R.id.btnBackward);
+        btnLeft = (Button) findViewById(R.id.btnLeft);
+        btnRight = (Button) findViewById(R.id.btnRight);
+        btnForward.setOnTouchListener(this);
+        btnBackward.setOnTouchListener(this);
+        btnLeft.setOnTouchListener(this);
+        btnRight.setOnTouchListener(this);
+
         fmController = new FollowMeController(this);
+
         btController = new BTController(this);
-        if (btController.setup(this)) {
+
+        joystickController = new JoystickControllerImpl();
+
+        /*if (btController.setup(this)) {
             btController.startBTServer();
-        }
+        }*/
 
         mDjiGLSurfaceView.start();
 
@@ -218,6 +231,29 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
                 fmController.decreaseAltitude();
                 break;
         }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+
+        boolean move = event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_MOVE;
+
+        switch (v.getId()) {
+            case R.id.btnForward:
+                joystickController.setMoveForward(move);
+                break;
+            case R.id.btnBackward:
+                joystickController.setMoveBackward(move);
+                break;
+            case R.id.btnLeft:
+                joystickController.setMoveLeft(move);
+                break;
+            case R.id.btnRight:
+                joystickController.setMoveRight(move);
+                break;
+        }
+
+        return false;
     }
 
     @Override

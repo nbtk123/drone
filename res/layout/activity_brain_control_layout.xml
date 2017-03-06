@@ -82,4 +82,36 @@
             android:onClick="onClick"/>
     </LinearLayout>
 
+    <Button
+        android:id="@+id/btnBackward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:text="S" />
+
+    <Button
+        android:id="@+id/btnLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/btnBackward"
+        android:layout_above="@id/btnBackward"
+        android:text="A" />
+
+    <Button
+        android:id="@+id/btnRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/btnBackward"
+        android:layout_above="@id/btnBackward"
+        android:text="D" />
+
+    <Button
+        android:id="@+id/btnForward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/btnLeft"
+        android:layout_centerHorizontal="true"
+        android:text="W" />
+
 </RelativeLayout>

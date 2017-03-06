@@ -2,6 +2,7 @@ package com.dji.sdkdemo.BrainControl;
 
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.util.UUID;
 
 /**
@@ -20,20 +22,27 @@ public class BTServerService extends IntentService {
     public static final String ACTION_START_LISTENING = "ACTION_START_LISTENING";
     public static final String ACTION_STOP_LISTENING = "ACTION_STOP_LISTENING";
 
-    public static final String EXTRA_BT_CONTROLLER = "EXTRA_BT_CONTROLLER";
+    private static InitData initData;
 
+    BTController btController;
     ListenThread listenThread;
+
+    public static void setInitData(InitData data) {
+        initData = data;
+    }
 
     public BTServerService() {
         super(BTServerService.class.getSimpleName());
         listenThread = new ListenThread();
+        btController = initData.getBtConreoller();
+
+        initData.clear();
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent.getAction().equals(ACTION_START_LISTENING)) {
             if (listenThread != null && !listenThread.isAlive()) {
-                BTController btController = (BTController) intent.getSerializableExtra(EXTRA_BT_CONTROLLER);
                 listenThread.setBTAdapter(btController.getBluetoothAdapter());
                 listenThread.start();
             }
@@ -46,26 +55,32 @@ public class BTServerService extends IntentService {
 
     private static class ListenThread extends Thread {
 
-        BluetoothServerSocket btServerSocket;
+        //BluetoothServerSocket btServerSocket;
         BluetoothAdapter btAdapter;
 
         @Override
         public void run() {
             try {
-                btServerSocket = btAdapter.listenUsingRfcommWithServiceRecord("DroneBrainControl", UUID.fromString("yoloblat"));
-                BluetoothSocket btSocket = btServerSocket.accept();
+                BluetoothDevice btDevice = btAdapter.getBondedDevices().iterator().next();
+                //UUID uuid = btDevice.getUuids()[1].getUuid();
+                BluetoothSocket btSocket = btDevice.createRfcommSocketToServiceRecord(UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb"));
+                btSocket.connect();
+                //btServerSocket = btAdapter.listenUsingRfcommWithServiceRecord("DroneBrainControl", uuid);
+                //BluetoothSocket btSocket = btServerSocket.accept(30000);
+                Log.d("BLAT", "PASSED IT!");
                 if (btSocket != null) {
+                    Log.d("BLAT", "SUCCESSFULLY!");
                     InputStreamReader reader = new InputStreamReader(btSocket.getInputStream());
                     int c;
                     while ((c = reader.read()) != -1) {
                         Log.d("BLAT", "Received from bluetooth: " + c);
                     }
                 }
-                btServerSocket.close();
+                //btServerSocket.close();
             } catch (IOException e) {
                 Log.e("BLAT", "BTServerService.startListening() failed!");
-                try { btServerSocket.close(); }
-                catch (IOException e1) { e1.printStackTrace(); }
+                /*try { btServerSocket.close(); }
+                catch (IOException e1) { e1.printStackTrace(); }*/
                 e.printStackTrace();
             }
         }
@@ -74,4 +89,20 @@ public class BTServerService extends IntentService {
             this.btAdapter = btAdapter;
         }
     }
+
+    public static class InitData {
+        private WeakReference<BTController> btController;
+
+        public InitData(BTController btController) {
+            this.btController = new WeakReference<BTController>(btController);
+        }
+        public BTController getBtConreoller() {
+            return btController.get();
+        }
+
+        public void clear() {
+            btController = null;
+        }
+    }
+
 }

@@ -26,12 +26,12 @@ public class BTController implements Serializable {
         return bluetoothAdapter;
     }
 
-    public boolean setup(Activity activityForResultIfBTNotEnabled){
+    public boolean setup(Activity activityForResultIfRequestToEnableBt){
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter != null) {
             if (!bluetoothAdapter.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                activityForResultIfBTNotEnabled.startActivityForResult(enableBtIntent, BrainControlActivity.REQUEST_CODE_ENABLE_BT);
+                activityForResultIfRequestToEnableBt.startActivityForResult(enableBtIntent, BrainControlActivity.REQUEST_CODE_ENABLE_BT);
             }
 
             return true;
@@ -42,9 +42,9 @@ public class BTController implements Serializable {
 
     public boolean startBTServer() {
         if (bluetoothAdapter != null) {
+            BTServerService.setInitData(new BTServerService.InitData(this));
             Intent intent = new Intent(context.get(), BTServerService.class);
             intent.setAction(BTServerService.ACTION_START_LISTENING);
-            intent.putExtra(BTServerService.EXTRA_BT_CONTROLLER, this);
             context.get().startService(intent);
             return true;
         }
