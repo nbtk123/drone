@@ -10,7 +10,7 @@ import dji.sdk.interfaces.DJIGroundStationExecuteCallBack;
 
 public class JoystickControllerImpl implements JoystickController{
 
-    public static final int MOVEMENT_SPEED = 500;
+    public static final int MAX_SPEED = 500;
 
     private int yaw;
     private int pitch;
@@ -29,40 +29,41 @@ public class JoystickControllerImpl implements JoystickController{
         });
     }
 
-    private void setYaw(int yaw) {
+    @Override
+    public void setYaw(int yaw) {
+
+        if (yaw > MAX_SPEED || yaw < -MAX_SPEED) {
+            yaw = MAX_SPEED;
+        }
+
         this.yaw = yaw;
         move(yaw, pitch, roll, throttle);
     }
-    private void setPitch(int pitch) {
+    public void setPitch(int pitch) {
+
+        if (pitch > MAX_SPEED || pitch < -MAX_SPEED) {
+            pitch = MAX_SPEED;
+        }
+
         this.pitch = pitch;
         move(yaw, pitch, roll, throttle);
     }
-    private void setRoll(int roll) {
+    public void setRoll(int roll) {
+
+        if (roll > MAX_SPEED || roll < -MAX_SPEED) {
+            roll = MAX_SPEED;
+        }
+
         this.roll = roll;
         move(yaw, pitch, roll, throttle);
     }
-    private void setThrottle(int throttle) {
+    public void setThrottle(int throttle) {
+
+        if (throttle > MAX_SPEED || throttle < -MAX_SPEED) {
+            throttle = MAX_SPEED;
+        }
+
         this.throttle = throttle;
         move(yaw, pitch, roll, throttle);
-    }
-
-    @Override
-    public void setMoveLeft(boolean move) {
-        setRoll(move ? -MOVEMENT_SPEED : 0);
-    }
-
-    @Override
-    public void setMoveRight(boolean move) {
-        setRoll(move ? MOVEMENT_SPEED : 0);
-    }
-
-    @Override
-    public void setMoveForward(boolean move) {
-        setPitch(move ? MOVEMENT_SPEED : 0);
-    }
-
-    @Override
-    public void setMoveBackward(boolean move) {
-        setPitch(move ? -MOVEMENT_SPEED : 0);
     }
 }

@@ -6,8 +6,8 @@ package com.dji.sdkdemo.BrainControl;
 
 public interface JoystickController {
 
-    void setMoveLeft(boolean move);
-    void setMoveRight(boolean move);
-    void setMoveForward(boolean move);
-    void setMoveBackward(boolean move);
+    void setPitch(int value);
+    void setRoll(int value);
+    void setThrottle(int value);
+    void setYaw(int value);
 }

@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.dji.sdkdemo.BrainControl.udp.DroneOrderParser;
+import com.dji.sdkdemo.BrainControl.udp.UDPReceiver;
 import com.dji.sdkdemo.R;
 
 import java.util.Timer;
@@ -43,6 +45,7 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
     FollowMeController fmController;
     BTController btController;
     JoystickController joystickController;
+    UDPReceiver udpReceiver;
 
     protected Timer mTimer;
 
@@ -50,7 +53,6 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
     protected static final int NAVI_MODE_ATTITUDE = 0;
 
     private String HpInfoString = "";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,6 +161,8 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
         });
 
         fmController.startLocationUpdate();
+        udpReceiver = new UDPReceiver(new DroneOrderParser(), joystickController);
+        udpReceiver.start();
     }
 
     @Override
@@ -186,11 +190,13 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
 
     @Override
     protected void onDestroy() {
-        if(DJIDrone.getDjiCamera() != null)
+        if(DJIDrone.getDjiCamera() != null) {
             DJIDrone.getDjiCamera().setReceivedVideoDataCallBack(null);
+        }
         mDjiGLSurfaceView.destroy();
         fmController.stopLocationUpdates();
         btController.stopBTServer();
+        udpReceiver.interrupt();
         super.onDestroy();
     }
 
@@ -238,19 +244,21 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
 
         boolean move = event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_MOVE;
 
-        switch (v.getId()) {
-            case R.id.btnForward:
-                joystickController.setMoveForward(move);
-                break;
-            case R.id.btnBackward:
-                joystickController.setMoveBackward(move);
-                break;
-            case R.id.btnLeft:
-                joystickController.setMoveLeft(move);
-                break;
-            case R.id.btnRight:
-                joystickController.setMoveRight(move);
-                break;
+        if (move) {
+            switch (v.getId()) {
+                case R.id.btnForward:
+                    joystickController.setPitch(JoystickControllerImpl.MAX_SPEED);
+                    break;
+                case R.id.btnBackward:
+                    joystickController.setPitch(-JoystickControllerImpl.MAX_SPEED);
+                    break;
+                case R.id.btnLeft:
+                    joystickController.setRoll(-JoystickControllerImpl.MAX_SPEED);
+                    break;
+                case R.id.btnRight:
+                    joystickController.setRoll(JoystickControllerImpl.MAX_SPEED);
+                    break;
+            }
         }
 
         return false;
