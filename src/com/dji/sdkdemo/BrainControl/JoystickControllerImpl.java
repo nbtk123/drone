@@ -8,7 +8,7 @@ import dji.sdk.interfaces.DJIGroundStationExecuteCallBack;
  * Created by nbtk123 on 06/03/2017.
  */
 
-public class JoystickControllerImpl implements JoystickController{
+public class JoystickControllerImpl implements JoystickController {
 
     public static final int MAX_SPEED = 500;
 

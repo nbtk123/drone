@@ -1,6 +1,7 @@
 package com.dji.sdkdemo.BrainControl;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,7 +11,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.dji.sdkdemo.BrainControl.udp.DroneOrderParser;
-import com.dji.sdkdemo.BrainControl.udp.UDPReceiver;
 import com.dji.sdkdemo.R;
 
 import java.util.Timer;
@@ -25,6 +25,8 @@ import dji.sdk.interfaces.DJIReceivedVideoDataCallBack;
 import dji.sdk.widget.DjiGLSurfaceView;
 
 public class BrainControlActivity extends Activity implements View.OnClickListener, View.OnTouchListener {
+
+    private static final String TAG = BrainControlActivity.class.getSimpleName();
 
     public static final int REQUEST_CODE_ENABLE_BT = 1;
 
@@ -43,9 +45,11 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
     protected TextView mConnectStateTextView;
 
     FollowMeController fmController;
-    BTController btController;
+    //BTController btController;
     JoystickController joystickController;
-    UDPReceiver udpReceiver;
+    CameraController cameraController;
+    //UDPReceiver udpReceiver;
+    protected BTServer btServer;
 
     protected Timer mTimer;
 
@@ -78,9 +82,59 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
 
         fmController = new FollowMeController(this);
 
-        btController = new BTController(this);
+        //btController = new BTController(this);
+        final DroneOrderParser droneOrderParser = new DroneOrderParser(new DroneOrderParser.ParserListener() {
+            @Override
+            public void onPitch(int value) {
+                joystickController.setPitch(value);
+            }
+
+            @Override
+            public void onRoll(int value) {
+                joystickController.setRoll(value);
+            }
+
+            @Override
+            public void onThrottle(int value) {
+                joystickController.setThrottle(value);
+            }
+
+            @Override
+            public void onYaw(int value) {
+                joystickController.setYaw(value);
+            }
+
+            @Override
+            public void takePicture() {
+                cameraController.takePicture();
+            }
+
+            @Override
+            public void startVideo() {
+                cameraController.startVideo();
+            }
+
+            @Override
+            public void stopVideo() {
+                cameraController.stopVideo();
+            }
+        });
+        btServer = new BTReceiverThread(BluetoothAdapter.getDefaultAdapter(), new BTListener() {
+            @Override
+            public void onBTDataReceived(String data) {
+                Log.d(TAG, "received from BT: " + data);
+
+                try {
+                    droneOrderParser.parse(data);
+                } catch (Exception e) {
+                    Log.d(TAG, "error parsing received data from BT: " + data);
+                    e.printStackTrace();
+                }
+            }
+        });
 
         joystickController = new JoystickControllerImpl();
+        cameraController = new CameraControllerImpl();
 
         /*if (btController.setup(this)) {
             btController.startBTServer();
@@ -161,8 +215,12 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
         });
 
         fmController.startLocationUpdate();
-        udpReceiver = new UDPReceiver(new DroneOrderParser(), joystickController);
-        udpReceiver.start();
+
+        if (btServer.askForBT(this)) {
+            btServer.start();
+        }
+        /*udpReceiver = new UDPReceiver(new DroneOrderParser(), joystickController);
+        udpReceiver.start();*/
     }
 
     @Override
@@ -195,8 +253,9 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
         }
         mDjiGLSurfaceView.destroy();
         fmController.stopLocationUpdates();
-        btController.stopBTServer();
-        udpReceiver.interrupt();
+        //btController.stopBTServer();
+        //udpReceiver.interrupt();
+        btServer.shutdown();
         super.onDestroy();
     }
 
@@ -271,19 +330,20 @@ public class BrainControlActivity extends Activity implements View.OnClickListen
             case REQUEST_CODE_ENABLE_BT:
                 switch (resultCode) {
                     case RESULT_OK:
-                        Log.d("BLAT", "onActivityResult: resultCode: RESULT_OK");
-                        btController.startBTServer();
+                        Log.d(TAG, "onActivityResult: resultCode: RESULT_OK");
+                        //btController.startBTServer();
+                        btServer.start();
                         break;
                     case RESULT_CANCELED:
-                        Log.d("BLAT", "onActivityResult: resultCode: RESULT_CANCEL");
+                        Log.d(TAG, "onActivityResult: resultCode: RESULT_CANCEL");
                         break;
                     default:
-                        Log.d("BLAT", "onActivityResult: resultCode: UNKNOWN: " + resultCode);
+                        Log.d(TAG, "onActivityResult: resultCode: UNKNOWN: " + resultCode);
                         break;
                 }
                 break;
             default:
-                Log.d("BLAT", "onActivityResult: unkown request code: " + requestCode);
+                Log.d(TAG, "onActivityResult: unkown request code: " + requestCode);
                 break;
         }
     }

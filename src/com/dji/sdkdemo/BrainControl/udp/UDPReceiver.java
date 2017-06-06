@@ -29,7 +29,7 @@ public class UDPReceiver extends Thread {
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 serverSocket.receive(receivePacket);
 
-                parser.parse(receivePacket, new DroneOrderParser.ParserListener() {
+                /*parser.parse(receivePacket, new DroneOrderParser.ParserListener() {
 
                     @Override
                     public void onPitch(int value) {
@@ -50,7 +50,7 @@ public class UDPReceiver extends Thread {
                     public void onYaw(int value) {
                         joystickController.setYaw(value);
                     }
-                });
+                });*/
             }
         } catch (Exception e) {
 
