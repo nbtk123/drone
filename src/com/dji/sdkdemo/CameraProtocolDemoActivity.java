@@ -664,7 +664,7 @@ public class CameraProtocolDemoActivity extends DemoBaseActivity implements OnCl
                                 CameraCaptureMode mode = CameraCaptureMode.Camera_Single_Capture;
                                     switch (pos1) {
                                         case 0 : {
-                                                mode = CameraCaptureMode.Camera_Single_Capture;
+                                            mode = CameraCaptureMode.Camera_Single_Capture;
                                             break;
                                         }
                                         
