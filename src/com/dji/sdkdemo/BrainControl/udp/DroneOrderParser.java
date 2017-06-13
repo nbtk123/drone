@@ -53,12 +53,9 @@ public class DroneOrderParser {
         String action = json.optString("action");
         String payloadStr = json.optString("payload");
 
-        if (action != null && payloadStr != null) {
-
-            action = action.toLowerCase();
-            JSONObject payload = new JSONObject(payloadStr.toLowerCase());
-
-            if (ACTION_MOVE.equals(action)) {
+        if (action != null) {
+            if (ACTION_MOVE.equals(action) && payloadStr != null) {
+                JSONObject payload = new JSONObject(payloadStr.toLowerCase());
                 if (payload.has(PAYLOAD_PITCH)) {
                     mParserListener.onPitch(payload.optInt(PAYLOAD_PITCH, 0));
                 } else if (payload.has(PAYLOAD_ROLL)) {

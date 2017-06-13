@@ -26,7 +26,11 @@ public class CameraControllerImpl implements CameraController {
                 Log.d(TAG, "Set Action errorCode = "+ mErr.errorCode);
                 Log.d(TAG, "Set Action errorDescription = "+ mErr.errorDescription);
                 //String result = "errorCode =" + mErr.errorCode + "\n"+"errorDescription =" + DJIError.getErrorDescriptionByErrcode(mErr.errorCode);
-
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 DJIDrone.getDjiCamera().stopTakePhoto(new DJIExecuteResultCallback(){
 
                     @Override

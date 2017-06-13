@@ -18,7 +18,9 @@ import java.util.UUID;
  */
 
 public class BTServerService extends IntentService {
-
+    
+    public static final String TAG = BTServerService.class.getSimpleName();
+    
     public static final String ACTION_START_LISTENING = "ACTION_START_LISTENING";
     public static final String ACTION_STOP_LISTENING = "ACTION_STOP_LISTENING";
 
@@ -61,24 +63,25 @@ public class BTServerService extends IntentService {
         @Override
         public void run() {
             try {
+                Log.d(TAG, "BT Listen thread is running...");
                 BluetoothDevice btDevice = btAdapter.getBondedDevices().iterator().next();
                 //UUID uuid = btDevice.getUuids()[1].getUuid();
                 BluetoothSocket btSocket = btDevice.createRfcommSocketToServiceRecord(UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb"));
                 btSocket.connect();
                 //btServerSocket = btAdapter.listenUsingRfcommWithServiceRecord("DroneBrainControl", uuid);
                 //BluetoothSocket btSocket = btServerSocket.accept(30000);
-                Log.d("BLAT", "PASSED IT!");
+                Log.d(TAG, "PASSED IT!");
                 if (btSocket != null) {
-                    Log.d("BLAT", "SUCCESSFULLY!");
+                    Log.d(TAG, "SUCCESSFULLY!");
                     InputStreamReader reader = new InputStreamReader(btSocket.getInputStream());
                     int c;
                     while ((c = reader.read()) != -1) {
-                        Log.d("BLAT", "Received from bluetooth: " + c);
+                        Log.d(TAG, "Received from bluetooth: " + c);
                     }
                 }
                 //btServerSocket.close();
             } catch (IOException e) {
-                Log.e("BLAT", "BTServerService.startListening() failed!");
+                Log.e(TAG, "BTServerService.startListening() failed!");
                 /*try { btServerSocket.close(); }
                 catch (IOException e1) { e1.printStackTrace(); }*/
                 e.printStackTrace();

@@ -27,6 +27,8 @@ import dji.sdk.interfaces.DJIGroundStationTakeOffCallBack;
  */
 public class FollowMeController implements LocationListener {
 
+    public static final String TAG_DRONE_GS = "DRONE_GS";
+
     protected static final int SHOWTOAST = 1;
     protected static final float MAX_ALTITUDE = 100;
     protected static final float MIN_ALTITUDE = 0;
@@ -89,17 +91,17 @@ public class FollowMeController implements LocationListener {
                 // TODO Auto-generated method stub
                 String ResultsString = "return code =" + result.name();
                 handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
-                Log.d("BLAT", "openGroundStation = " + result.name());
+                Log.d(TAG_DRONE_GS, "openGroundStation = " + result.name());
 
                 isGSOpen = true;
-                //flyToGroundStationTaskWaypoint();
+                flyToGroundStationTaskWaypoint();
             }
 
         });
     }
 
     protected void flyToGroundStationTaskWaypoint() {
-        Log.d("BLAT", "flyToGroundStationTaskWaypoint() : lat=" + latitude + ", lon=" + longitude + ", alt=" + altitude);
+        Log.d(TAG_DRONE_GS, "flyToGroundStationTaskWaypoint() : lat=" + latitude + ", lon=" + longitude + ", alt=" + altitude);
 
         DJIDrone.getDjiGroundStation().startGroundStationTask(new DJIGroundStationTakeOffCallBack() {
             @Override
@@ -126,7 +128,7 @@ public class FollowMeController implements LocationListener {
                 // TODO Auto-generated method stub
                 String ResultsString = "return code =" + result.name();
                 handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
-                Log.d("BLAT", "flyToGroundStationTaskWaypoint = " + result.name());
+                Log.d(TAG_DRONE_GS, "flyToGroundStationTaskWaypoint = " + result.name());
             }
 
         });*/
@@ -152,7 +154,7 @@ public class FollowMeController implements LocationListener {
                     // TODO Auto-generated method stub
                     String ResultsString = "return code =" + result.name();
                     handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
-                    Log.d("BLAT", "updateGroundStationTask : uploadGroundStationTask = " + result.name());
+                    Log.d(TAG_DRONE_GS, "updateGroundStationTask : uploadGroundStationTask = " + result.name());
 
                     flyToGroundStationTaskWaypoint();
                 }
@@ -161,7 +163,7 @@ public class FollowMeController implements LocationListener {
         }
 
         if (isGSOpen) {
-            /*Log.d("BLAT", "updateGroundStationTask()");
+            /*Log.d(TAG_DRONE_GS, "updateGroundStationTask()");
             DJIDrone.getDjiGroundStation().cancelHotPoint(new DJIGroundStationCancelCallBack() {
 
                 @Override
@@ -170,7 +172,7 @@ public class FollowMeController implements LocationListener {
                     // TODO Auto-generated method stub
                     String ResultsString = "return code =" + result.name();
                     handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
-                    Log.d("BLAT", "updateGroundStationTask : cancelHotPoint = " + result.name());
+                    Log.d(TAG_DRONE_GS, "updateGroundStationTask : cancelHotPoint = " + result.name());
                     flyToGroundStationTaskWaypoint();
                 }
 
@@ -188,7 +190,7 @@ public class FollowMeController implements LocationListener {
                 // TODO Auto-generated method stub
                 String ResultsString = "return code =" + result.name();
                 handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
-                Log.d("BLAT", "cancelHotPoint = " + result.name());
+                Log.d(TAG_DRONE_GS, "cancelHotPoint = " + result.name());
                 closeGS();
             }
 

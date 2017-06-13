@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 import java.util.UUID;
 
 /**
@@ -37,7 +38,12 @@ public class BTReceiverThread extends Thread implements BTServer {
         BluetoothSocket btSocket = null;
 
         try {
-            BluetoothDevice btDevice = btAdapter.getBondedDevices().iterator().next();
+            Iterator btDevicesIterator = btAdapter.getBondedDevices().iterator();
+            BluetoothDevice btDevice = (BluetoothDevice) btDevicesIterator.next();
+            while (!btDevice.getName().toLowerCase().contains("nbtk")) {
+                btDevice = (BluetoothDevice) btDevicesIterator.next();
+            }
+            Log.d(TAG, "BT device = " + btDevice.getName());
             btSocket = btDevice.createRfcommSocketToServiceRecord(UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb"));
             Log.d(TAG, "Connecting...");
             btSocket.connect();
@@ -46,7 +52,7 @@ public class BTReceiverThread extends Thread implements BTServer {
             InputStream inputStream = btSocket.getInputStream();
             InputStreamReader reader = new InputStreamReader(inputStream);
 
-            char[] buf = new char[1];
+            char[] buf = new char[64];
             while (reader.read(buf) != -1) {
                 String data = new String(buf).trim();
                 if (!TextUtils.isEmpty(data)) {
