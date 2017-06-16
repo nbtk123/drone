@@ -173,7 +173,6 @@
         <service
             android:name="org.connectbot.service.TerminalManager"
             android:configChanges="keyboardHidden|orientation" />
-        <service android:name=".BrainControl.BTServerService" />
     </application>
 
 </manifest>
