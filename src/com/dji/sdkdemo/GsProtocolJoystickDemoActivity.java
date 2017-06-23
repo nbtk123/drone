@@ -286,7 +286,7 @@ public class GsProtocolJoystickDemoActivity extends DemoBaseActivity implements 
 
                         Log.d("BLAT" ,"mScreenJoystickLeft yaw="+yaw);
                         Log.d("BLAT" ,"mScreenJoystickLeft throttle="+throttle);
-                            
+                        Log.d("BLAT", "" + System.currentTimeMillis());
                         DJIDrone.getDjiGroundStation().setAircraftJoystick(yaw, pitch, roll, throttle,new DJIGroundStationExecuteCallBack(){
 
                             @Override
@@ -319,6 +319,7 @@ public class GsProtocolJoystickDemoActivity extends DemoBaseActivity implements 
 
 				Log.d("BLAT" ,"mScreenJoystickRight pitch="+pitch);
 				Log.d("BLAT" ,"mScreenJoystickRight roll="+roll);
+                Log.d("BLAT", "" + System.currentTimeMillis());
 				
 //                new Thread()
 //                {
@@ -590,7 +591,7 @@ public class GsProtocolJoystickDemoActivity extends DemoBaseActivity implements 
                         String ResultsString = "return code =" + result.name();
                         handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
                     }
-                });  
+                });
                 break;  
 
             case R.id.ResumeButton:

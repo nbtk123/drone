@@ -48,6 +48,11 @@ public class DroneOrderParser {
     // {action: stopVideo}
 
     public void parse(String data) throws Exception {
+
+        //Patch for the BeeSeeEye program since it cannot get long strings in c:\work\data... csv file.
+        data = data.replace("pitch1000","{action: move, payload: {pitch: 1000}}");
+        data = data.replace("pitch-1000","{action: move, payload: {pitch: -1000}}");
+
         JSONObject json = new JSONObject(data);
 
         String action = json.optString("action");
