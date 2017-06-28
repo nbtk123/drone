@@ -50,8 +50,13 @@ public class DroneOrderParser {
     public void parse(String data) throws Exception {
 
         //Patch for the BeeSeeEye program since it cannot get long strings in c:\work\data... csv file.
-        data = data.replace("pitch1000","{action: move, payload: {pitch: 1000}}");
-        data = data.replace("pitch-1000","{action: move, payload: {pitch: -1000}}");
+        //data = data.replace("pitch1000","{action: move, payload: {pitch: 1000}}");
+        //data = data.replace("pitch-1000","{action: move, payload: {pitch: -1000}}");
+
+        //Patch for the BeeSeeEye program since it cannot get long strings in c:\work\data... csv file.
+        data = data.replace("yaw50","{action: move, payload: {pitch: 1000}}");
+        data = data.replace("yaw-50","{action: move, payload: {pitch: -1000}}");
+        //data = data.replace("halt","{action: move, payload: {yaw: 0, pitch: 0, roll: 0, throttle: 0}}");
 
         JSONObject json = new JSONObject(data);
 
@@ -63,11 +68,14 @@ public class DroneOrderParser {
                 JSONObject payload = new JSONObject(payloadStr.toLowerCase());
                 if (payload.has(PAYLOAD_PITCH)) {
                     mParserListener.onPitch(payload.optInt(PAYLOAD_PITCH, 0));
-                } else if (payload.has(PAYLOAD_ROLL)) {
+                }
+                if (payload.has(PAYLOAD_ROLL)) {
                     mParserListener.onRoll(payload.optInt(PAYLOAD_ROLL, 0));
-                } else if (payload.has(PAYLOAD_THROTTLE)) {
+                }
+                if (payload.has(PAYLOAD_THROTTLE)) {
                     mParserListener.onThrottle(payload.optInt(PAYLOAD_THROTTLE, 0));
-                } else if (payload.has(PAYLOAD_YAW)) {
+                }
+                if (payload.has(PAYLOAD_YAW)) {
                     mParserListener.onYaw(payload.optInt(PAYLOAD_YAW, 0));
                 }
             } else if (ACTION_TAKE_PICTURE.equals(action)) {

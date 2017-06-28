@@ -20,7 +20,7 @@ import dji.sdk.interfaces.DJIGroundStationOneKeyFlyCallBack;
 public class JoystickControllerImpl implements JoystickController {
 
     public static final String TAG = JoystickControllerImpl.class.getSimpleName();
-    public static final int MAX_SPEED = 1000;
+    public static final int MAX_SPEED = 500;
 
     private int yaw;
     private int pitch;
@@ -36,15 +36,60 @@ public class JoystickControllerImpl implements JoystickController {
                 String ResultsString = "return code =" + result.name();
                 Log.d(TAG, "move() --> pauseGroundStationTask --> result = ".concat(result.name()));
 
-                DJIDrone.getDjiGroundStation().setAircraftJoystick(yaw, pitch, roll, throttle,new DJIGroundStationExecuteCallBack(){
+                setAircraftJoystick(yaw, pitch, roll, throttle);
+            }
+        });
+    }
 
+    private void setAircraftJoystick(final int yaw, final int pitch, final int roll, final int throttle) {
+        DJIDrone.getDjiGroundStation().setAircraftJoystick(yaw, pitch, roll, throttle,new DJIGroundStationExecuteCallBack(){
+
+            @Override
+            public void onResult(DJIGroundStationTypeDef.GroundStationResult result) {
+                // TODO Auto-generated method stub
+                Log.d(TAG, "move() --> setAircraftJoystick --> result = ".concat(result.name()));
+                Log.d(TAG, String.format("(yaw, pitch, roll, throttle) = (%s, %s, %s, %s)", yaw, pitch, roll, throttle));
+            }
+        });
+    }
+
+    private void moveSmooth(final int targetYaw, final int targetPitch, final int targetRoll, final int targetThrottle) {
+
+        DJIDrone.getDjiGroundStation().pauseGroundStationTask(new DJIGroundStationHoverCallBack(){
+
+            @Override
+            public void onResult(DJIGroundStationTypeDef.GroundStationHoverResult result) {
+                // TODO Auto-generated method stub
+                String ResultsString = "return code =" + result.name();
+                Log.d(TAG, "move() --> pauseGroundStationTask --> result = ".concat(result.name()));
+
+                new Thread(new Runnable() {
                     @Override
-                    public void onResult(DJIGroundStationTypeDef.GroundStationResult result) {
-                        // TODO Auto-generated method stub
-                        Log.d(TAG, "move() --> setAircraftJoystick --> result = ".concat(result.name()));
-                        Log.d(TAG, String.format("(yaw, pitch, roll, throttle) = (%s, %s, %s, %s)", yaw, pitch, roll, throttle));
+                    public void run() {
+                        for (int i=0; i<=MAX_SPEED; i+=50) {
+
+                            int yawSign = targetYaw < 0 ? -1 : 1;
+                            int pitchSign = targetPitch < 0 ? -1 : 1;
+                            int rollSign = targetRoll < 0 ? -1 : 1;
+                            int throttleSign = targetThrottle < 0 ? -1 : 1;
+
+                            // Every paramter is set up to its target value + Check for negative values
+                            int yaw = i <= Math.abs(targetYaw) ? i*yawSign : targetYaw;
+                            int pitch = i <= Math.abs(targetPitch) ? i*pitchSign : targetPitch;
+                            int roll = i <= Math.abs(targetRoll) ? i*rollSign : targetRoll;
+                            int throttle = i <= Math.abs(targetThrottle) ? i*throttleSign : targetThrottle;
+
+                            // let it fly
+                            setAircraftJoystick(yaw, pitch, roll, throttle);
+
+                            try {
+                                Thread.sleep(10);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
-                });
+                }).start();
             }
         });
     }
@@ -58,7 +103,7 @@ public class JoystickControllerImpl implements JoystickController {
         }
 
         this.yaw = yaw;
-        move(yaw, pitch, roll, throttle);
+        moveSmooth(yaw, pitch, roll, throttle);
     }
     public void setPitch(int pitch) {
 
@@ -68,7 +113,7 @@ public class JoystickControllerImpl implements JoystickController {
         }
 
         this.pitch = pitch;
-        move(yaw, pitch, roll, throttle);
+        moveSmooth(yaw, pitch, roll, throttle);
     }
     public void setRoll(int roll) {
 
@@ -78,7 +123,7 @@ public class JoystickControllerImpl implements JoystickController {
         }
 
         this.roll = roll;
-        move(yaw, pitch, roll, throttle);
+        moveSmooth(yaw, pitch, roll, throttle);
     }
     public void setThrottle(int throttle) {
 
@@ -88,6 +133,6 @@ public class JoystickControllerImpl implements JoystickController {
         }
 
         this.throttle = throttle;
-        move(yaw, pitch, roll, throttle);
+        moveSmooth(yaw, pitch, roll, throttle);
     }
 }
