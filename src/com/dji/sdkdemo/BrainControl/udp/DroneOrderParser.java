@@ -54,8 +54,8 @@ public class DroneOrderParser {
         //data = data.replace("pitch-1000","{action: move, payload: {pitch: -1000}}");
 
         //Patch for the BeeSeeEye program since it cannot get long strings in c:\work\data... csv file.
-        data = data.replace("yaw50","{action: move, payload: {pitch: 1000}}");
-        data = data.replace("yaw-50","{action: move, payload: {pitch: -1000}}");
+        data = data.replace("yaw50","{action: move, payload: {yaw: 50}}");
+        data = data.replace("yaw-50","{action: move, payload: {yaw: -50}}");
         //data = data.replace("halt","{action: move, payload: {yaw: 0, pitch: 0, roll: 0, throttle: 0}}");
 
         JSONObject json = new JSONObject(data);

@@ -13,13 +13,19 @@ import android.widget.Toast;
 import com.dji.sdkdemo.R;
 
 import java.lang.ref.WeakReference;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import dji.sdk.api.DJIDrone;
+import dji.sdk.api.DJIDroneTypeDef;
+import dji.sdk.api.GroundStation.DJIGroundStationFlyingInfo;
 import dji.sdk.api.GroundStation.DJIGroundStationTask;
 import dji.sdk.api.GroundStation.DJIGroundStationTypeDef;
 import dji.sdk.api.GroundStation.DJIGroundStationWaypoint;
-import dji.sdk.interfaces.DJIGroundStationCancelCallBack;
 import dji.sdk.interfaces.DJIGroundStationExecuteCallBack;
+import dji.sdk.interfaces.DJIGroundStationFlyingInfoCallBack;
+import dji.sdk.interfaces.DJIGroundStationHoverCallBack;
+import dji.sdk.interfaces.DJIGroundStationOneKeyFlyCallBack;
 import dji.sdk.interfaces.DJIGroundStationTakeOffCallBack;
 
 /**
@@ -44,6 +50,9 @@ public class FollowMeController implements LocationListener {
 
     protected boolean getHomePiontFlag = false;
     protected boolean isGSOpen = false;
+
+    Timer mCheckModeForPauseTimer;
+    private DJIGroundStationTypeDef.GroundStationFlightMode mFlightMode;
 
     private Handler handler = new Handler(new Handler.Callback() {
 
@@ -100,6 +109,71 @@ public class FollowMeController implements LocationListener {
         });
     }
 
+    protected  void oneKeyFly() {
+        Log.d(TAG_DRONE_GS, "oneKeyFly");
+
+        DJIDrone.getDjiGroundStation().setGroundStationFlyingInfoCallBack(new DJIGroundStationFlyingInfoCallBack(){
+
+            @Override
+            public void onResult(DJIGroundStationFlyingInfo flyingInfo) {
+                // TODO Auto-generated method stub
+                //Log.e(TAG, "DJIGroundStationFlyingInfo homeLocationLatitude " +flyingInfo.homeLocationLatitude);
+                //Log.e(TAG, "DJIGroundStationFlyingInfo homeLocationLongitude " +flyingInfo.homeLocationLongitude);
+
+                mFlightMode = flyingInfo.flightMode;
+            }
+
+        });
+
+        DJIDrone.getDjiGroundStation().openGroundStation(new DJIGroundStationExecuteCallBack(){
+
+            @Override
+            public void onResult(DJIGroundStationTypeDef.GroundStationResult result) {
+                // TODO Auto-generated method stub
+                String ResultsString = "opengs return code =" + result.name();
+                handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
+
+                if(result == DJIGroundStationTypeDef.GroundStationResult.GS_Result_Successed){
+
+                    //one key fly
+                    DJIDrone.getDjiGroundStation().oneKeyFly(new DJIGroundStationOneKeyFlyCallBack(){
+                        @Override
+                        public void onResult(DJIGroundStationTypeDef.GroundStationOneKeyFlyResult result) {
+                            // TODO Auto-generated method stub
+
+                            String ResultsString = "one key fly return code =" + result.name();
+                            handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
+
+                            if(result == DJIGroundStationTypeDef.GroundStationOneKeyFlyResult.GS_One_Key_Fly_Successed){
+
+                                if(DJIDrone.getDroneType() == DJIDroneTypeDef.DJIDroneType.DJIDrone_Vision){
+                                    mCheckModeForPauseTimer = new Timer();
+                                    CheckModeForPauseTask mCheckTask = new CheckModeForPauseTask();
+                                    mCheckModeForPauseTimer.schedule(mCheckTask, 100, 1000);
+                                }
+                                else{
+                                    //DealSuccessWithVibrate();
+                                    Log.d(TAG_DRONE_GS, "oneKeyFly --> success!");
+                                }
+                            }
+                            else{
+                                //DealErrorWithVibrate();
+                                Log.d(TAG_DRONE_GS, "oneKeyFly --> FAIL!");
+                            }
+                        }
+
+                    });
+                }
+                else{
+                    //DealErrorWithVibrate();
+                    Log.d(TAG_DRONE_GS, "oneKeyFly --> openGroundStation --> FAIL!");
+                }
+
+            }
+
+        });
+    }
+
     protected void flyToGroundStationTaskWaypoint() {
         Log.d(TAG_DRONE_GS, "flyToGroundStationTaskWaypoint() : lat=" + latitude + ", lon=" + longitude + ", alt=" + altitude);
 
@@ -109,6 +183,13 @@ public class FollowMeController implements LocationListener {
                 // TODO Auto-generated method stub
                 String ResultsString = "return code =" + result.name();
                 handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
+
+                DJIDrone.getDjiGroundStation().pauseGroundStationTask(new DJIGroundStationHoverCallBack() {
+                    @Override
+                    public void onResult(DJIGroundStationTypeDef.GroundStationHoverResult groundStationHoverResult) {
+                        Log.d(TAG_DRONE_GS, "pauseGroundStationTask = " + groundStationHoverResult.name());
+                    }
+                });
             }
         });
         /*DJIHotPointInitializationInfo info = new DJIHotPointInitializationInfo();
@@ -254,7 +335,7 @@ public class FollowMeController implements LocationListener {
         latitude = location.getLatitude();
         longitude = location.getLongitude();
         if (location.getAccuracy() <= 10) {
-            updateGroundStationTask();
+            //updateGroundStationTask();
         }
     }
 
@@ -277,4 +358,66 @@ public class FollowMeController implements LocationListener {
         }
     }
     // LocationListener implementation END
+
+
+    class CheckModeForPauseTask extends TimerTask {
+
+        @Override
+        public void run()
+        {
+            if(mFlightMode == DJIGroundStationTypeDef.GroundStationFlightMode.GS_Mode_Pause_1 || mFlightMode == DJIGroundStationTypeDef.GroundStationFlightMode.GS_Mode_Pause_2 || mFlightMode == DJIGroundStationTypeDef.GroundStationFlightMode.GS_Mode_Gps_Atti){
+                if(checkGetHomePoint()){
+                    DJIDrone.getDjiGroundStation().pauseGroundStationTask(new DJIGroundStationHoverCallBack(){
+
+                        @Override
+                        public void onResult(DJIGroundStationTypeDef.GroundStationHoverResult result) {
+                            // TODO Auto-generated method stub
+                            String ResultsString = "pause return code =" + result.name();
+                            handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
+
+                            if(result == DJIGroundStationTypeDef.GroundStationHoverResult.GS_Hover_Successed){
+                                if(mCheckModeForPauseTimer != null){
+                                    mCheckModeForPauseTimer.cancel();
+                                    mCheckModeForPauseTimer.purge();
+                                    mCheckModeForPauseTimer = null;
+
+                                    Log.d(TAG_DRONE_GS, "CheckModeForPauseTask --> pauseGroundStationTask --> success");
+                                }
+                            }
+                        }
+                    });
+                }
+                return;
+            }
+
+
+//        	if(mFlightMode == GroundStationFlightMode.GS_Mode_Waypoint){
+//        		if(checkGetHomePoint()){
+//                    DJIDrone.getDjiGroundStation().pauseGroundStationTask(new DJIGroundStationHoverCallBack(){
+//
+//                        @Override
+//                        public void onResult(GroundStationHoverResult result) {
+//                            // TODO Auto-generated method stub
+//                            String ResultsString = "pause return code =" + result.name();
+//                            handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
+//
+//                            if(result == GroundStationHoverResult.GS_Hover_Successed){
+//                            	if(mCheckModeForPauseTimer != null){
+//                	        		mCheckModeForPauseTimer.cancel();
+//                		            mCheckModeForPauseTimer.purge();
+//                		            mCheckModeForPauseTimer = null;
+//
+//                		            DealSuccessWithVibrate();
+//                        		}
+//                            }
+//                        }
+//                    });
+//            	}
+//
+//        	}
+
+            Log.d(TAG_DRONE_GS ,"mFlightMode==========>"+mFlightMode);
+        }
+
+    };
 }
