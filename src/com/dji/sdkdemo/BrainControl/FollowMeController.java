@@ -92,21 +92,23 @@ public class FollowMeController implements LocationListener {
     protected void openGS() {
         //if(!checkGetHomePoint()) return;
 
-        DJIDrone.getDjiGroundStation().openGroundStation(new DJIGroundStationExecuteCallBack() {
+//        DJIDrone.getDjiGroundStation().openGroundStation(new DJIGroundStationExecuteCallBack() {
+//
+//            @Override
+//            public void onResult(DJIGroundStationTypeDef.GroundStationResult result)
+//            {
+//                // TODO Auto-generated method stub
+//                String ResultsString = "return code =" + result.name();
+//                handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
+//                Log.d(TAG_DRONE_GS, "openGroundStation = " + result.name());
+//
+//                isGSOpen = true;
+//                flyToGroundStationTaskWaypoint();
+//            }
+//
+//        });
 
-            @Override
-            public void onResult(DJIGroundStationTypeDef.GroundStationResult result)
-            {
-                // TODO Auto-generated method stub
-                String ResultsString = "return code =" + result.name();
-                handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
-                Log.d(TAG_DRONE_GS, "openGroundStation = " + result.name());
-
-                isGSOpen = true;
-                flyToGroundStationTaskWaypoint();
-            }
-
-        });
+        oneKeyFly();
     }
 
     protected  void oneKeyFly() {
@@ -130,7 +132,7 @@ public class FollowMeController implements LocationListener {
             @Override
             public void onResult(DJIGroundStationTypeDef.GroundStationResult result) {
                 // TODO Auto-generated method stub
-                String ResultsString = "opengs return code =" + result.name();
+                String ResultsString = "openGroundStation = " + result.name();
                 handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
 
                 if(result == DJIGroundStationTypeDef.GroundStationResult.GS_Result_Successed){
@@ -141,7 +143,7 @@ public class FollowMeController implements LocationListener {
                         public void onResult(DJIGroundStationTypeDef.GroundStationOneKeyFlyResult result) {
                             // TODO Auto-generated method stub
 
-                            String ResultsString = "one key fly return code =" + result.name();
+                            String ResultsString = "oneKeyFly = " + result.name();
                             handler.sendMessage(handler.obtainMessage(SHOWTOAST, ResultsString));
 
                             if(result == DJIGroundStationTypeDef.GroundStationOneKeyFlyResult.GS_One_Key_Fly_Successed){
