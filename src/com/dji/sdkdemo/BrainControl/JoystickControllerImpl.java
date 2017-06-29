@@ -103,7 +103,7 @@ public class JoystickControllerImpl implements JoystickController {
         }
 
         this.yaw = yaw;
-        moveSmooth(yaw, pitch, roll, throttle);
+        move(yaw, pitch, roll, throttle);
     }
     public void setPitch(int pitch) {
 
@@ -113,7 +113,7 @@ public class JoystickControllerImpl implements JoystickController {
         }
 
         this.pitch = pitch;
-        moveSmooth(yaw, pitch, roll, throttle);
+        move(yaw, pitch, roll, throttle);
     }
     public void setRoll(int roll) {
 
@@ -123,7 +123,7 @@ public class JoystickControllerImpl implements JoystickController {
         }
 
         this.roll = roll;
-        moveSmooth(yaw, pitch, roll, throttle);
+        move(yaw, pitch, roll, throttle);
     }
     public void setThrottle(int throttle) {
 
@@ -133,6 +133,6 @@ public class JoystickControllerImpl implements JoystickController {
         }
 
         this.throttle = throttle;
-        moveSmooth(yaw, pitch, roll, throttle);
+        move(yaw, pitch, roll, throttle);
     }
 }
